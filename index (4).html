@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindLog - دفتر يومياتك الشخصي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF9F0;
+            --title-color: #7B68EE;
+            --button-color: #FF7675;
+            --button-hover: #E84343;
+            --text-color: #2D3436;
+            --entry-bg: #FFFFFF;
+            --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            --border-color: #E0E0E0;
+            --accent-color: #FDCB6E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #F8F4EA 100%);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .app-title {
+            font-weight: 700;
+            color: var(--title-color);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        .app-subtitle {
+            font-weight: 300;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: var(--text-color);
+        }
+
+        .entries-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 100px;
+        }
+
+        .entry-card {
+            background-color: var(--entry-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            border-left: 4px solid var(--title-color);
+        }
+
+        .entry-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .entry-date {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--title-color);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .entry-content {
+            width: 100%;
+            min-height: 180px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            line-height: 1.9;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .entry-content:focus {
+            outline: none;
+            border-color: var(--title-color);
+            box-shadow: 0 0 0 2px rgba(123, 104, 238, 0.2);
+        }
+
+        .entry-content::placeholder {
+            color: #aaa;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .add-entry-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255, 118, 117, 0.3);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .add-entry-btn:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .save-btn {
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-btn:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            color: #aaa;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .delete-btn:hover {
+            color: var(--button-hover);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #aaa;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        /* Animation for new entries */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .new-entry {
+            animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .app-title {
+                font-size: 2.2rem;
+            }
+
+            .entry-card {
+                padding: 25px;
+            }
+
+            .add-entry-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+                bottom: 20px;
+                left: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .entry-date {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .entry-content {
+                min-height: 150px;
+                padding: 15px;
+            }
+
+            .save-btn {
+                width: 100%;
+                padding: 12px;
+            }
+        }
+
+        /* Mood selector */
+        .mood-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mood-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+
+        .mood-option:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .mood-option.selected {
+            opacity: 1;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--title-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <h1 class="app-title">MindLog</h1>
+        <p class="app-subtitle">سجل أفكارك ومشاعرك يوماً بيوم</p>
+    </div>
+
+    <div class="entries-container" id="entriesContainer">
+        <div class="empty-state" id="emptyState">لا توجد مدخلات بعد. اضغط على زر + لبدء اليوميات.</div>
+    </div>
+
+    <button class="add-entry-btn" id="addEntryBtn">+</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const entriesContainer = document.getElementById('entriesContainer');
+            const addEntryBtn = document.getElementById('addEntryBtn');
+            const emptyState = document.getElementById('emptyState');
+
+            // Load saved entries from localStorage
+            loadEntries();
+
+            // Add new entry
+            addEntryBtn.addEventListener('click', function() {
+                createNewEntry();
+            });
+
+            function createNewEntry(date = new Date(), content = '', mood = '') {
+                // Hide empty state if it's the first entry
+                if (emptyState) emptyState.style.display = 'none';
+                
+                const entryId = Date.now();
+                const entryDate = formatDate(date);
+                
+                const entryCard = document.createElement('div');
+                entryCard.className = 'entry-card new-entry';
+                entryCard.dataset.id = entryId;
+                
+                entryCard.innerHTML = `
+                    <div class="entry-date">
+                        <span>${entryDate}</span>
+                        <button class="delete-btn" onclick="deleteEntry('${entryId}')">
+                            <span>حذف</span>
+                        </button>
+                    </div>
+                    <div class="mood-selector">
+                        <div class="mood-option" style="background: #74b9ff;" onclick="setMood(this, '${entryId}')" title="سعيد"></div>
+                        <div class="mood-option" style="background: #55efc4;" onclick="setMood(this, '${entryId}')" title="هادئ"></div>
+                        <div class="mood-option" style="background: #ffeaa7;" onclick="setMood(this, '${entryId}')" title="عادي"></div>
+                        <div class="mood-option" style="background: #fab1a0;" onclick="setMood(this, '${entryId}')" title="قلق"></div>
+                        <div class="mood-option" style="background: #fd79a8;" onclick="setMood(this, '${entryId}')" title="حزين"></div>
+                    </div>
+                    <textarea class="entry-content" placeholder="اكتب هنا ما يدور في ذهنك اليوم... ما هي أفكارك؟ ما الذي تشعر به؟ ما الذي تريد تحقيقه؟">${content}</textarea>
+                    <button class="save-btn" onclick="saveEntry('${entryId}')">
+                        <span>حفظ</span>
+                    </button>
+                `;
+                
+                entriesContainer.prepend(entryCard);
+                
+                // Focus on the new entry's textarea
+                const textarea = entryCard.querySelector('.entry-content');
+                textarea.focus();
+                
+                // Set mood if exists
+                if (mood) {
+                    const moodOptions = entryCard.querySelectorAll('.mood-option');
+                    moodOptions.forEach(option => {
+                        if (option.style.background === mood) {
+                            option.classList.add('selected');
+                        }
+                    });
+                }
+                
+                return entryId;
+            }
+
+            function formatDate(date) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('ar-EG', options);
+            }
+
+            function loadEntries() {
+                const savedEntries = JSON.parse(localStorage.getItem('mindlog-entries')) || [];
+                
+                if (savedEntries.length > 0) {
+                    emptyState.style.display = 'none';
+                    
+                    // Sort entries by date (newest first)
+                    savedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    savedEntries.forEach(entry => {
+                        createNewEntry(new Date(entry.date), entry.content, entry.mood);
+                    });
+                }
+            }
+
+            window.saveEntry = function(entryId) {
+                const entryCard = document.querySelector(`.entry-card[data-id="${entryId}"]`);
+                const content = entryCard.querySelector('.entry-content').value;
+                const moodOption = entryCard.querySelector('.mood-option.selected');
+                const mood = moodOption ? moodOption.style.background : '';
+                const date = new Date();
+                
+                let entries = JSON.parse(localStorage.getItem('mindlog-entries')) || [];
+                
+                // Update or add the entry
+                const existingEntryIndex = entries.findIndex(e => e.id === entryId);
+                if (existingEntryIndex >= 0) {
+                    entries[existingEntryIndex].content = content;
+                    entries[existingEntryIndex].date = date;
+                    entries[existingEntryIndex].mood = mood;
+                } else {
+                    entries.unshift({
+                        id: entryId,
+                        date: date,
+                        content: content,
+                        mood: mood
+                    });
+                }
+                
+                localStorage.setItem('mindlog-entries', JSON.stringify(entries));
+                
+                // Update the date display
+                entryCard.querySelector('.entry-date span').textContent = formatDate(date);
+                
+                // Show a temporary feedback
+                const saveBtn = entryCard.querySelector('.save-btn');
+                const originalText = saveBtn.querySelector('span').textContent;
+                saveBtn.querySelector('span').textContent = 'تم الحفظ!';
+                setTimeout(() => {
+                    saveBtn.querySelector('span').textContent = originalText;
+                }, 2000);
+            };
+
+            window.setMood = function(element, entryId) {
+                const moodSelector = element.parentElement;
+                const moodOptions = moodSelector.querySelectorAll('.mood-option');
+                
+                moodOptions.forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                element.classList.add('selected');
+                saveEntry(entryId);
+            };
+
+            window.deleteEntry = function(entryId) {
+                if (confirm('هل أنت متأكد من حذف هذه المدخلة؟')) {
+                    let entries = JSON.parse(localStorage.getItem('mindlog-entries')) || [];
+                    entries = entries.filter(e => e.id !== entryId);
+                    localStorage.setItem('mindlog-entries', JSON.stringify(entries));
+                    
+                    const entryCard = document.querySelector(`.entry-card[data-id="${entryId}"]`);
+                    entryCard.classList.add('new-entry');
+                    entryCard.style.opacity = '0';
+                    entryCard.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        entryCard.remove();
+                        
+                        // Show empty state if no entries left
+                        if (document.querySelectorAll('.entry-card').length === 0) {
+                            emptyState.style.display = 'block';
+                        }
+                    }, 300);
+                }
+            };
+
+            // Auto-save when clicking outside the textarea
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('entry-content') || 
+                    e.target.classList.contains('mood-option')) return;
+                
+                const activeTextarea = document.querySelector('.entry-content:focus');
+                if (activeTextarea) {
+                    const entryCard = activeTextarea.closest('.entry-card');
+                    if (entryCard) {
+                        const saveBtn = entryCard.querySelector('.save-btn');
+                        saveBtn.click();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
